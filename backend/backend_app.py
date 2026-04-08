@@ -67,6 +67,18 @@ def _next_id():
 
 
 #------------Routes--------------------------------
+@app.get("/api/posts/search")
+def search_posts(title: Optional[str] = None, content: Optional[str] = None):
+    matched_posts = []
+    for post in POSTS:
+        if title and title.lower() in post["title"].lower():
+            if post not in matched_posts:
+                matched_posts.append(post)
+        if content and content.lower() in post["content"].lower():
+            if post not in matched_posts:
+                matched_posts.append(post)
+    return matched_posts
+
 @app.get("/api/posts")
 def get_posts():
     return POSTS
