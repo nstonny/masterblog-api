@@ -85,5 +85,18 @@ def delete_post(post_id: int):
         raise HTTPException(status_code=404, detail="Post not found")
     POSTS = [post for post in POSTS if post["id"] != post_id]
 
+@app.put("/api/posts/{post_id}", response_model=Post)
+def update_post(post_id: int, post: PostUpdate):
+    for existing_post in POSTS:
+        if existing_post["id"] == post_id:
+            if post.title is not None:
+                existing_post["title"] = post.title
+            if post.content is not None:
+                existing_post["content"] = post.content
+            return existing_post
+    raise HTTPException(status_code=404, detail="Post not found")
+
+
+
 
 
