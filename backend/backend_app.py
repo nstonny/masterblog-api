@@ -80,8 +80,23 @@ def search_posts(title: Optional[str] = None, content: Optional[str] = None):
     return matched_posts
 
 @app.get("/api/posts")
-def get_posts():
-    return POSTS
+def get_posts(sort: Optional[str] = None, direction: Optional[str] = None):
+    # Validate sort field
+    if sort and sort not in ["title", "content"]:
+        raise HTTPException(status_code=400, detail="Invalid sort field. Must be 'title' or 'content'")
+
+    # Validate direction
+    if direction and direction not in ["asc", "desc"]:
+        raise HTTPException(status_code=400, detail="Invalid sort direction. Must be 'asc' or 'desc'")
+
+    # Return original order if no sorting requested
+    if not sort:
+        return POSTS
+
+    # Sort posts
+    reverse = direction == "desc"
+    sorted_posts = sorted(POSTS, key=lambda post: post[sort].lower(), reverse=reverse)
+    return sorted_posts
 
 @app.post("/api/posts", response_model=Post, status_code=201)
 def add_post(post: PostCreate):
