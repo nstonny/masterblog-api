@@ -9,6 +9,18 @@ window.onload = function() {
     }
 }
 
+function renderPost(post) {
+    const container = document.getElementById('post-container');
+    const div = document.createElement('div');
+    div.className = 'post';
+    div.innerHTML = `
+        <h2>${post.title}</h2>
+        <p>${post.content}</p>
+        <button onclick="deletePost(${post.id})">Delete</button>
+    `;
+    container.appendChild(div);
+}
+
 // Function to fetch all the posts from the API and display them on the page
 function loadPosts() {
     // Retrieve the base URL from the input field and save it to local storage
@@ -48,17 +60,30 @@ function addPost() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: postTitle, content: postContent })
     })
-    .then(response => response.json())  // Parse the JSON data from the response
+    .then(response => {
+        if (!response.ok) {
+            // If response is not ok (status code 400, etc.), parse and show error
+            return response.json().then(errorData => {
+                throw new Error(errorData.error || 'Failed to add post');
+            });
+        }
+        return response.json();
+    })
     .then(post => {
         console.log('Post added:', post);
         loadPosts(); // Reload the posts after adding a new one
+        document.getElementById('post-title').value   = '';  // ✅ clear inputs
+        document.getElementById('post-content').value = '';
     })
-    .catch(error => console.error('Error:', error));  // If an error occurs, log it to the console
+    .catch(error => {
+        console.error('Error:', error);
+        alert(error.message);  // Show alert with the error message
+    });
 }
 
 // Function to send a DELETE request to the API to delete a post
 function deletePost(postId) {
-    var baseUrl = document.getElementById('api-base-url').value;
+    const baseUrl = document.getElementById('api-base-url').value;
 
     // Use the Fetch API to send a DELETE request to the specific post's endpoint
     fetch(baseUrl + '/posts/' + postId, {
