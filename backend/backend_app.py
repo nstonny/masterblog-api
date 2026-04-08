@@ -77,4 +77,13 @@ def add_post(post: PostCreate):
     POSTS.append(new_post)
     return new_post
 
+@app.delete("/api/posts/{post_id}", status_code=204)
+def delete_post(post_id: int):
+    global POSTS
+    post_exists = any(post["id"] == post_id for post in POSTS)
+    if not post_exists:
+        raise HTTPException(status_code=404, detail="Post not found")
+    POSTS = [post for post in POSTS if post["id"] != post_id]
+
+
 
